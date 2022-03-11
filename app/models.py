@@ -52,42 +52,44 @@ class User(UserMixin,db.Model):
         return comments
     def __repr__(self):
         return f'User {self.username}'
-class Pitches(db.Model):
-    __tablename__ = 'pitches'
+class Blogs(db.Model):
+    __tablename__ = 'blogs'
     id = db.Column(db.Integer,primary_key = True)
-    pitch_id = db.Column(db.Integer)
-    pitch_title = db.Column(db.String)
-    pitch_category = db.Column(db.String)
-    the_pitch = db.Column(db.String)
+    blog_id = db.Column(db.Integer)
+    blog_title = db.Column(db.String)
+    the_blog = db.Column(db.String)
     posted = db.Column(db.DateTime,default=datetime.utcnow)
-    user_id = db.Column(db.Integer,db.ForeignKey("users.id"))
-    comment = db.relationship('Comments', backref='pitch', lazy="dynamic")
-    def save_pitch(self):
+    comment = db.relationship('Comments', backref='blog', lazy="dynamic")
+    def save_blog(self):
         db.session.add(self)
         db.session.commit()
     @classmethod
-    def get_pitches(cls, category):
-        pitches= Pitches.query.filter_by(pitch_category=category)
-        return pitches
+    def get_blogs(cls, id):
+        blogs= Blogs.query.filter_by(blog_id=id)
+        return blogs
     @classmethod
     def get_comments(cls,id):
         comments = Comments.query.filter_by(comment_id=id).all()
         return comments
     @classmethod
-    def getPitchId(cls, id):
-        pitch = Pitches.query.filter_by(id=id).first()
-        return pitch
+    def getBlogsId(cls, id):
+        blogs = Blogs.query.filter_by(id=id).first()
+        return blogs
     @classmethod
-    def clear_pitches(cls):
-        Pitches.all_pitches.clear()
+    def clear_blogs(cls):
+        Blogs.all_blogs.clear()
+
+    def __repr__(self):
+        return f'Blogs {self.the_blog}'
+
 class Comments(db.Model):
     __tablename__ = 'comments'
     id = db.Column(db.Integer,primary_key = True)
     comment_id = db.Column(db.Integer)
-    pitch_comment = db.Column(db.String)
+    blog_comment = db.Column(db.String)
     posted = db.Column(db.DateTime,default=datetime.utcnow)
     user_id = db.Column(db.Integer,db.ForeignKey("users.id"))
-    pitches_id = db.Column(db.Integer, db.ForeignKey("pitches.id"))
+    blog_id = db.Column(db.Integer, db.ForeignKey("blog.id"))
     def save_comment(self):
         db.session.add(self)
         db.session.commit()
@@ -95,6 +97,13 @@ class Comments(db.Model):
     def get_comments(cls,id):
         comments = Comments.query.order_by(Comments.posted.desc()).filter_by(pitches_id=id).all()
         return comments
+    def del_comment(self):
+        db.session.delete(self)
+        db.session.commit()
+
+    def __repr__(self):
+        return f'Comment: id:{self.id} comment: {self.blog_comment}'
+        
 class PhotoProfile(db.Model):
     __tablename__ = 'profile_photos'
     id = db.Column(db.Integer,primary_key = True)
