@@ -19,7 +19,7 @@ def login():
 
         flash('Invalid username or Password')
 
-    title = "pitches login"
+    title = "Personal-blog "
     return render_template('auth/login.html',login_form = login_form,title=title)
 
 
@@ -31,10 +31,10 @@ def register():
         db.session.add(user)
         db.session.commit()
 
-        mail_message("Welcome to pitches","email/welcome_user",user.email,user=user)
+        mail_message("Welcome to personal-blog ","email/welcome_user",user.email,user=user)
 
         return redirect(url_for('auth.login'))
-        title = "New user"
+        # title = "New user"
     return render_template('auth/register.html',registration_form = form)
      
 
