@@ -68,24 +68,33 @@ def index():
 #         return redirect(url_for('main.index'))
 #     title='New Pitch'
 #     return render_template('new_comment.html',title=title,comment_form = form,pitches_id=pitches_id)
-# @main.route('/user/<uname>')
-# @login_required
-# def profile(uname):
-#     user = User.query.filter_by(username = uname).first()
-#     if user is None:
-#         abort(404)
-#     return render_template("profile/profile.html", user = user)
-# @main.route('/user/<uname>/update',methods = ['GET','POST'])
-# def update_profile(uname):
-#     user = User.query.filter_by(username = uname).first()
-#     if user is None:
-#         abort(404)
-#     form = UpdateProfile()
-#     if form.validate_on_submit():
-#         user.bio = form.bio.data
-#         db.session.add(user)
-#         db.session.commit()
-#         return redirect(url_for('.profile',uname = user.username))
+
+@main.route('/blogs/recent/<int:id>', methods=['POST', 'GET'])
+def recent_blogs(id):
+    blogs=Blogs.query.filter_by(id=posted).all()
+    return render_template('recent.html', blogs=blogs)
+
+def update_profile(uname):
+    user = User.query.filter_by(username = uname).first()
+    if user is None:
+        abort(404)
+    form = UpdateProfile()
+    if form.validate_on_submit():
+        user.bio = form.bio.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('.profile',uname = user.username))
+
+@main.route('/user/<uname>')
+def profile(uname):
+    user = User.query.filter_by(username = uname).first()
+
+    if user is None:
+        abort(404)
+
+    return render_template("profile/profile.html", user = user)
+
+
 #     return render_template('profile/update.html',form = form)
 # @main.route('/user/<uname>/update/pic',methods = ['POST'])
 # @login_required

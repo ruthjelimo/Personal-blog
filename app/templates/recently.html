@@ -1,0 +1,24 @@
+{% extends 'bootstrap/base.html' %}
+{% block content %}
+<div class="container">
+    <div class="display">
+        <h2 style="color: brown; font-size: 30px; text-align: center;">Recent Blogs</h2>
+        <div class="display" style="display: flex; justify-content: center; flex-wrap: wrap; flex-direction: row;">
+            {% for blog in blogs %}
+            <div class="card" style="width: 35rem; margin: 5px;">
+                <div class="card-body">
+                  <h3 class="card-title" style="color: brown; font-size: 30px; text-align: center;"><h5>{{blog.title}}</h3>
+                  <p class="card-text">{{blog.details|truncate(100)}}</p>
+                  <h5 class="card-title">Posetd by: {{blog.user.username}}</h5>
+                  <h5 class="card-title">Posetd on: {{blog.posted_date.strftime("%Y/%m/%d")}}</h5>
+                  <a href="{{url_for('main.add_comment', blogs_id=blog.id)}}"><i class="fas fa-comment fa-fw pr-3"></i>Comment</a>
+                  {% if blog.user==current_user %}
+                        <a href="{{url_for('main.updateBlog',id=blog.id)}}"><i class="fas fa-pen pr-3"></i>Delete</a>
+                  {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}
