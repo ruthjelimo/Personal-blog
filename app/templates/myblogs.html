@@ -1,0 +1,32 @@
+{% extends 'base.html' %} {%block content%}
+
+<div class="container">
+    <div class="row">
+        {%for blog in blogs%}
+        <div class=" col-md-4">
+            <!-- <div class="panel text-center" style="box-shadow: 0 4px 8px 0 rgba(15, 14, 14, 0.87);"> -->
+            <!-- <div class="panel-head text-info"> -->
+            <h3>Title ~ {{blog.title_blog}}</h3>
+            <hr>
+            <!-- </div> -->
+
+            <!-- <div class="panel-body"> -->
+            <p>{{blog.description}}</p>
+
+            <p class="text-right text-muted"> <b>~ {{blog.user.username}} ~</b></p>
+            <hr>
+
+            <!-- <div class="panel-footer"> -->
+            <p class="date text-muted">Posted on ~ {{blog.date.strftime('%Y-%m-%d')}}</p>
+            <a href="{{url_for('main.view', id=blog.id)}}" class="btn btn-info">VIEW</a>&nbsp;&nbsp;&nbsp;&nbsp; {% if blog.user == current_user%}
+            <a href="{{url_for('main.delete', id=blog.id)}}" class="btn btn-info">DELETE</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="{{url_for('main.update_blog', id=blog.id)}}" class="btn btn-info">EDIT</i></a> {% endif %}
+        </div>
+        {%endfor%}
+    </div>
+</div>
+
+</div>
+</div>
+
+{%endblock%}

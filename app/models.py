@@ -1,114 +1,127 @@
-from werkzeug.security import generate_password_hash,check_password_hash
 from . import db
-from datetime import datetime
 from werkzeug.security import generate_password_hash,check_password_hash
-# from werkzeug.utils import secure_filename
-# from werkzeug.datastructures import  FileStorage
-from flask_login import UserMixin,current_user
-
+from flask_login import UserMixin
 from . import login_manager
-
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
+from datetime import datetime
 
 
-class Quotes:
-    quote_list=[]
-    def __init__(self,author,id,quote,permanentlink) :
-        self.author=author
-        self.id=id
-        self.quote=quote
-        self.permanentlink=permanentlink
+
 
 class User(UserMixin,db.Model):
     __tablename__ = 'users'
+
     id = db.Column(db.Integer,primary_key = True)
     username = db.Column(db.String(255),index = True)
+    # firstname = db.Column(db.String(255))
+    # lastname = db.Column(db.String(255))
     email = db.Column(db.String(255),unique = True,index = True)
     bio = db.Column(db.String(255))
     profile_pic_path = db.Column(db.String())
-    password_secure = db.Column(db.String(255))
-    blog = db.relationship("Blogs", backref="user", lazy="dynamic")
-    comments = db.relationship('Comment', backref = 'user', passive_deletes=True,lazy = 'dynamic')
+    pass_secure = db.Column(db.String(255))
+    password_hash = db.Column(db.String(255))
+    date_joined = db.Column(db.DateTime,default=datetime.utcnow)
+    blogs = db.relationship('Blog', backref ='user', passive_deletes=True,lazy = "dynamic")
+    comments = db.relationship('Comment', backref ='user' , passive_deletes=True,  lazy ="dynamic")
 
-    
     @property
     def password(self):
         raise AttributeError('You cannot read the password attribute')
+
     @password.setter
     def password(self, password):
-        self.password_secure = generate_password_hash(password)
-
+        self.pass_secure = generate_password_hash(password)
 
     def verify_password(self,password):
-        return check_password_hash(self.password_secure,password)
-    def save_blogs(self):
-        db.session.add(self)
-        db.session.commit()
-    @classmethod
-    def get_comments(cls,id):
-        comments = Comments.query.filter_by(comment_id=id).all()
-        return comments
+        return check_password_hash(self.password_hash,password)
+
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
+
+
+
     def __repr__(self):
         return f'User {self.username}'
-class Blogs(db.Model):
+
+class Blog(db.Model):
     __tablename__ = 'blogs'
-    id = db.Column(db.Integer,primary_key = True)
-    blog_id = db.Column(db.Integer)
-    blog_title = db.Column(db.String)
-    the_blog = db.Column(db.String)
-    posted = db.Column(db.DateTime,default=datetime.utcnow)
-    comment = db.relationship('Comments', backref='blog', lazy="dynamic")
+    id = db.Column(db.Integer, primary_key=True)
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+    title_blog = db.Column(db.String(255), index=True)
+    description = db.Column(db.String(255), index=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='CASCADE'), nullable=False)
+
     def save_blog(self):
         db.session.add(self)
         db.session.commit()
+
     @classmethod
     def get_blogs(cls, id):
-        blogs= Blogs.query.filter_by(blog_id=id)
+        blogs = Blog.query.filter_by(id=id).all()
         return blogs
     @classmethod
-    def get_comments(cls,id):
-        comments = Comments.query.filter_by(comment_id=id).all()
-        return comments
-    @classmethod
-    def getBlogsId(cls, id):
-        blogs = Blogs.query.filter_by(id=id).first()
+    def get_all_blogs(cls):
+        blogs = Blog.query.order_by('-id').all()
         return blogs
-    @classmethod
-    def clear_blogs(cls):
-        Blogs.all_blogs.clear()
-
     def __repr__(self):
-        return f'Blogs {self.the_blog}'
+        return f'Blogs {self.blog_title}'
 
-class Comments(db.Model):
+class Comment(db.Model):
     __tablename__ = 'comments'
-    id = db.Column(db.Integer,primary_key = True)
-    comment_id = db.Column(db.Integer)
-    blog_comment = db.Column(db.String)
-    posted = db.Column(db.DateTime,default=datetime.utcnow)
-    user_id = db.Column(db.Integer,db.ForeignKey("users.id"))
-    blog_id = db.Column(db.Integer, db.ForeignKey("blog.id"))
+    id = db.Column(db.Integer, primary_key=True)
+    comment = db.Column(db.Text())
+    blog_id = db.Column(db.Integer, db.ForeignKey('blogs.id',ondelete='CASCADE'))
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id',ondelete='CASCADE'))
+    date = db.Column(db.DateTime, default=datetime.utcnow)
+
+
     def save_comment(self):
         db.session.add(self)
         db.session.commit()
+
     @classmethod
-    def get_comments(cls,id):
-        comments = Comments.query.order_by(Comments.posted.desc()).filter_by(pitches_id=id).all()
+    def get_comments(cls, blog_id):
+        comments = Comment.query.filter_by(blog_id=blog_id).all()
         return comments
-    def del_comment(self):
+    def delete_comment(self):
         db.session.delete(self)
         db.session.commit()
-
     def __repr__(self):
-        return f'Comment: id:{self.id} comment: {self.blog_comment}'
-        
-class PhotoProfile(db.Model):
-    __tablename__ = 'profile_photos'
-    id = db.Column(db.Integer,primary_key = True)
-    pic_path = db.Column(db.String())
-    user_id = db.Column(db.Integer,db.ForeignKey("users.id"))
+        return f'Comments: {self.comment}'
+
+
+class Subscriber(UserMixin, db.Model):
+   __tablename__="subscribers"
+
+   id = db.Column(db.Integer, primary_key=True)
+   name = db.Column(db.String(255))
+   email = db.Column(db.String(255),unique = True,index = True)
+
+
+   def save_subscriber(self):
+       db.session.add(self)
+       db.session.commit()
+
+   @classmethod
+   def get_subscribers(cls,id):
+       return Subscriber.query.all()
+
+
+   def __repr__(self):
+       return f'User {self.email}'
+
+class Quote:
+    """
+    Class for creating our random quotes.
+    """
+    def __init__(self, author, quote):
+        self.author = author
+        self.quote = quote
+ 
+    
 
 
 
+
+    

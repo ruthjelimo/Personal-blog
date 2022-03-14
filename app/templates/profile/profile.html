@@ -1,43 +1,48 @@
-{% extends 'base.html'%}
-
-{% block content %}
+{% extends 'base.html' %} {%import "bootstrap/wtf.html" as wtf%}{% block content %}
 <div class="container">
-<div class="row">
-<!-- displaying  Username-->
-  <div class="col-md-4">
-    <h3> {{user.username| capitalize}} </h3>
+    <div class="row">
+        <!-- displaying  Username-->
+        <h1 class="text-center"> {{user.username| capitalize}} </h1>
+        <hr>
+        <!--Display profile photo-->
+        <div class="col-md-4">
+            <div class="">
+                {% if user.profile_pic_path %}
+                <img class="" src="{{url_for('static', filename=user.profile_pic_path)}}" alt="profile" class="img-circle img-responsive" width="250px"><br><br> {%else%}
+                <i class="fas fa-user fa-10x text-center"></i> <br><br> {% endif %} {% if user == current_user %}
+                <form action="{{url_for('main.update_pic',uname=user.username)}}" method="post" enctype="multipart/form-data">
+                    <input type="file" name="photo" class="form-control" required><br>
+                    <input type="submit">
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4">
+            <p> <b>Name:</b> {{user.firstname}} {{user.lastname}} </p>
+            <p><b> No of blogs:</b> {{blogs}}</p>
+            <p><b> Date joined: </b>{{user.date_joined.strftime("%Y-%m-%d")}}</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h3><b>Add Your Bio</b></h3>
 
-    <!--Displaying user bio-->
-    {% if user.bio %}
-      <p> {{user.bio}}</p>
-    {%else%}
-      <p> {{user.username| capitalize}} has no bio </p>
-    {% endif %}
-  </div>
-
-  <!--Display profile photo-->
-  <div class="col-md-4">
-    {% if user.profile_pic_path %}
-
-    <img src="{{url_for('static',filename=user.profile_pic_path)}}" alt="" class="img-thumbnail">
-
-    {%else%}
-    <p>No profile picture</p>
-
-    {% endif %}
-
-        {% if user == current_user %}
-    <form  action="{{url_for('main.update_pic',uname=user.username)}}" method="post" enctype = "multipart/form-data">
-
-      <input type="file"  name="photo" class="form-control" required>
-      <input type="submit">
-    </form>
-      {% endif %}
-  </div>
+        <!--Displaying user bio-->
+        {% if user.bio %}
+        <p> {{user.bio}}.</p>
+        {%else%}
+        <p> {{user.username| capitalize}} has no bio </p>
+        {% endif %} {% if user == current_user %}
+        <a href="{{url_for('main.update_profile',uname=user.username)}}"><button type="button"
+                    class="btn btn-info">Edit profile</button></a> {% endif %}
+    </div>
 
 </div>
-</div>
+
+<style>
+    body {
+        background-image: url('https://images.unsplash.com/photo-1529163835670-f5e2159a34a0?ixid=MXwxMjA3fDB8MHxzZWFyY2h8MXx8c2Ftc3VuZ3xlbnwwfHwwfA%3D%3D&ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60');
+        background-size: cover;
+        background-repeat: no-repeat;
+    }
+</style>
 {% endblock %}
-{% if user == current_user %}
-    <a href="{{url_for('main.update_profile',uname=user.username)}}">Edit profile</a>
-{% endif %}
