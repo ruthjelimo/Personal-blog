@@ -4,7 +4,7 @@ Personal-blog
 
 ## Author
  
- By Ruth
+ By Ruth jelimo
 
  ### Description
 
